@@ -1,0 +1,5 @@
+<resources><style name="Theme.Klock" parent="@android:style/Theme.Material.Light.NoActionBar">
+<item name="android:statusBarColor">@android:color/transparent</item>
+<item name="android:navigationBarColor">@android:color/transparent</item>
+<item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+<item name="android:windowBackground">@android:color/black</item></style></resources>
