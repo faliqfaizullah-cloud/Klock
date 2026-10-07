@@ -1,7 +1,6 @@
 package com.klock.app
 import android.app.*
 import android.content.*
-import android.media.RingtoneManager
 import java.util.Calendar
 data class AlarmItem(val id: Int, val h: Int, val m: Int, val label: String, val on: Boolean)
 object Alarms {
@@ -12,25 +11,28 @@ object Alarms {
         l.forEach { set(c, it) }
     }
     private fun pi(c: Context, id: Int, label: String = "") = PendingIntent.getBroadcast(c, id,
-        Intent(c, AlarmReceiver::class.java).putExtra("l", label), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        Intent(c, AlarmReceiver::class.java).putExtra("l", label).putExtra("id", id), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     fun cancel(c: Context, id: Int) = c.getSystemService(AlarmManager::class.java).cancel(pi(c, id))
+    private fun fire(c: Context, at: Long, id: Int, label: String) {
+        val show = PendingIntent.getActivity(c, 0, Intent(c, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
+        try { c.getSystemService(AlarmManager::class.java).setAlarmClock(AlarmManager.AlarmClockInfo(at, show), pi(c, id, label)) }
+        catch (e: SecurityException) { android.widget.Toast.makeText(c, "Allow exact alarms for Klock in Settings", android.widget.Toast.LENGTH_LONG).show() }
+    }
     fun set(c: Context, a: AlarmItem) {
-        val am = c.getSystemService(AlarmManager::class.java)
         if (!a.on) return cancel(c, a.id)
         val t = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, a.h); set(Calendar.MINUTE, a.m); set(Calendar.SECOND, 0)
             if (timeInMillis <= System.currentTimeMillis()) add(Calendar.DAY_OF_YEAR, 1) }
-        val show = PendingIntent.getActivity(c, 0, Intent(c, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
-        try { am.setAlarmClock(AlarmManager.AlarmClockInfo(t.timeInMillis, show), pi(c, a.id, a.label)) }
-        catch (e: SecurityException) { android.widget.Toast.makeText(c, "Allow exact alarms for Klock in Settings", android.widget.Toast.LENGTH_LONG).show() }
+        fire(c, t.timeInMillis, a.id, a.label)
     }
+    fun snooze(c: Context, label: String) = fire(c, System.currentTimeMillis() + 10 * 60_000L, 888, label)
 }
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(c: Context, i: Intent) {
-        val nm = c.getSystemService(NotificationManager::class.java)
-        nm.createNotificationChannel(NotificationChannel("al", "Alarms", NotificationManager.IMPORTANCE_HIGH))
-        nm.notify(1, Notification.Builder(c, "al").setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle(i.getStringExtra("l").orEmpty().ifBlank { "Alarm" }).setCategory(Notification.CATEGORY_ALARM)
-            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).setAutoCancel(true)
-            .setContentIntent(PendingIntent.getActivity(c, 0, Intent(c, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)).build())
+        val id = i.getIntExtra("id", 0)
+        Alarms.load(c).find { it.id == id }?.let { Alarms.set(c, it) }
+        c.startForegroundService(Intent(c, AlarmService::class.java).putExtra("l", i.getStringExtra("l").orEmpty()))
     }
+}
+class BootReceiver : BroadcastReceiver() {
+    override fun onReceive(c: Context, i: Intent) { Alarms.load(c).forEach { Alarms.set(c, it) } }
 }

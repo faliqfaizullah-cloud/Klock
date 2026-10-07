@@ -1,10 +1,7 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root"
-  android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"
-  android:gravity="center_horizontal" android:background="@drawable/widget_bg" android:paddingTop="10dp" android:paddingBottom="10dp">
-  <TextView android:id="@+id/city" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFFFF" android:textSize="12sp" android:textStyle="bold"/>
-  <TextClock android:layout_width="wrap_content" android:layout_height="0dp" android:layout_weight="1" android:gravity="center" android:format12Hour="hh" android:format24Hour="HH"
-    android:textColor="#FFFFFFFF" android:textSize="52sp" android:includeFontPadding="false" android:fontFamily="sans-serif-medium"/>
-  <TextClock android:layout_width="wrap_content" android:layout_height="0dp" android:layout_weight="1" android:gravity="center" android:format12Hour="mm" android:format24Hour="mm"
-    android:textColor="#CCFFFFFF" android:textSize="52sp" android:includeFontPadding="false" android:fontFamily="sans-serif-medium"/>
-  <TextClock android:layout_width="wrap_content" android:layout_height="wrap_content" android:format12Hour="EEE, d MMM" android:format24Hour="EEE, d MMM" android:textColor="#FFFFFFFF" android:textSize="11sp" android:textStyle="bold"/>
-</LinearLayout>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent">
+  <ImageView android:id="@+id/dial" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY"/>
+  <TextClock android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="top|center_horizontal" android:layout_marginTop="10dp"
+    android:format12Hour="a" android:format24Hour="EEE" android:textSize="13sp" android:textStyle="bold" android:textColor="@color/w_dim"/>
+  <TextClock android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="top|center_horizontal" android:layout_marginTop="27dp"
+    android:format12Hour="hh" android:format24Hour="HH" android:textSize="32sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:textColor="@color/w_ink"/>
+</FrameLayout>
