@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/widget_bg" android:clipToOutline="true">
   <ImageView android:id="@+id/dial" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY"/>
   <TextClock android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="top|center_horizontal" android:layout_marginTop="10dp"
     android:format12Hour="a" android:format24Hour="EEE" android:textSize="13sp" android:textStyle="bold" android:textColor="@color/w_dim"/>
