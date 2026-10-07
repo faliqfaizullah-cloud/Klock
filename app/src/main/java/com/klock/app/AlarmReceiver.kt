@@ -19,8 +19,9 @@ object Alarms {
         if (!a.on) return cancel(c, a.id)
         val t = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, a.h); set(Calendar.MINUTE, a.m); set(Calendar.SECOND, 0)
             if (timeInMillis <= System.currentTimeMillis()) add(Calendar.DAY_OF_YEAR, 1) }
-        val p = pi(c, a.id, a.label)
-        am.setAlarmClock(AlarmManager.AlarmClockInfo(t.timeInMillis, p), p)
+        val show = PendingIntent.getActivity(c, 0, Intent(c, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
+        try { am.setAlarmClock(AlarmManager.AlarmClockInfo(t.timeInMillis, show), pi(c, a.id, a.label)) }
+        catch (e: SecurityException) { android.widget.Toast.makeText(c, "Allow exact alarms for Klock in Settings", android.widget.Toast.LENGTH_LONG).show() }
     }
 }
 class AlarmReceiver : BroadcastReceiver() {

@@ -13,6 +13,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -166,21 +167,57 @@ fun utc(t: ZonedDateTime): String { val o = t.offset.totalSeconds / 3600f; retur
     })
 }
 
+@Composable fun AlarmTile(a: AlarmItem, i: Int, mod: Modifier, onLong: () -> Unit, onTap: () -> Unit) {
+    val ang = listOf(-5f, 4f, -3f, 5f)[i % 4]
+    val bg by animateColorAsState(if (a.on) Color(0xFFEDEDED) else Color(0xFF121212), label = "tb"); val fg = if (a.on) Color.Black else Ink
+    val rot by animateFloatAsState(if (a.on) ang else ang / 2, spring(0.5f, 300f), label = "r")
+    Box(mod.fillMaxWidth().aspectRatio(1f).rotate(rot).press(onLong, onTap).background(bg, R28).border(1.dp, Line, R28).padding(16.dp)) {
+        Box(Modifier.size(44.dp).background(if (a.on) Color.Black else Chip, CircleShape), Alignment.Center) {
+            Text(if (a.on) "ON" else "OFF", color = if (a.on) Ink else Dim, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+        Column(Modifier.align(Alignment.BottomStart)) {
+            Text(a.label + if (!use24) (if (a.h < 12) " · AM" else " · PM") else "", color = Dim, fontSize = 14.sp)
+            Text(hm(a.h, a.m), fontSize = 40.sp, fontWeight = FontWeight.Light, letterSpacing = (-1).sp, color = fg, maxLines = 1)
+        }
+    }
+}
+
 @Composable fun AlarmScreen() {
-    val c = LocalContext.current; val hp = LocalHapticFeedback.current
+    val c = LocalContext.current
     val list = remember { mutableStateListOf<AlarmItem>().apply { addAll(Alarms.load(c)) } }
     fun commit() = Alarms.save(c, list.toList())
+    fun add() = pick(c, 7, 0) { h, m -> list.add(AlarmItem((System.currentTimeMillis() % 100000).toInt(), h, m, "Alarm", true)); commit() }
     val now = LocalDateTime.now()
     val next = list.filter { it.on }.minOfOrNull { val t = now.toLocalDate().atTime(it.h, it.m); Duration.between(now, if (t.isAfter(now)) t else t.plusDays(1)).toMinutes() }
-    Column {
-        Head("Alarms", if (next != null) "Next alarm in ${next / 60}h ${next % 60}m" else "No alarm set") {
-            Plus { pick(c, 7, 0) { h, m -> list.add(AlarmItem((System.currentTimeMillis() % 100000).toInt(), h, m, "Alarm", true)); commit() } } }
-        LazyColumn(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            itemsIndexed(list, key = { _, it -> it.id }) { i, a ->
-                TCard(a.label + if (!use24) (if (a.h < 12) " · AM" else " · PM") else "", if (a.on) "On" else "Off", hm(a.h, a.m), a.on, "⏰",
-                    Modifier.animateItemPlacement().enter(i).press({ Alarms.cancel(c, a.id); list.remove(a); commit() }) { list[list.indexOf(a)] = a.copy(on = !a.on); commit() })
+    Box(Modifier.fillMaxSize().drawBehind {
+        val g = 11.dp.toPx(); var y = 0f
+        while (y < size.height) { var x = 0f; while (x < size.width) { drawCircle(Color(0xFF2B2B2B), 1.dp.toPx(), Offset(x, y)); x += g }; y += g }
+    }) {
+        Column(Modifier.fillMaxSize()) {
+            Column(Modifier.padding(24.dp, 16.dp, 24.dp, 8.dp)) {
+                Text("Creating Alarm", fontSize = 34.sp, fontWeight = FontWeight.Bold, color = Ink)
+                Text(if (next != null) "Next alarm in ${next / 60}h ${next % 60}m" else "No alarm set", color = Dim, fontSize = 14.sp)
             }
-            item { Text(if (list.isEmpty()) "Tap + to add an alarm" else "Tap to toggle · long-press to delete", color = Dim, fontSize = 12.sp, modifier = Modifier.padding(8.dp)) }
+            val snap = list.toList()
+            LazyVerticalGrid(GridCells.Fixed(2), contentPadding = PaddingValues(20.dp, 12.dp, 20.dp, 100.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                items(snap.size, key = { snap[it].id }) { i ->
+                    val a = snap[i]
+                    AlarmTile(a, i, Modifier.animateItemPlacement().enter(i), { Alarms.cancel(c, a.id); list.remove(a); commit() }) { list[list.indexOf(a)] = a.copy(on = !a.on); commit() }
+                }
+            }
+        }
+        if (list.isEmpty()) Column(Modifier.align(Alignment.Center).padding(24.dp)) {
+            Text("Set\nMultiple", fontSize = 44.sp, lineHeight = 46.sp, fontWeight = FontWeight.Bold, color = Ink)
+            Text("Alarms", fontSize = 44.sp, lineHeight = 46.sp, fontWeight = FontWeight.Bold, color = Dim) }
+        Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp), Arrangement.SpaceBetween, Alignment.CenterVertically) {
+            Box(Modifier.size(56.dp).background(Color(0xFF3A1111), CircleShape).press { for (k in list.indices) list[k] = list[k].copy(on = false); commit() }, Alignment.Center) {
+                Box(Modifier.size(18.dp).background(Color(0xFFFF2020), RoundedCornerShape(4.dp))) }
+            Box(Modifier.width(150.dp).height(56.dp).background(Chip, CircleShape).border(1.dp, Line, CircleShape).press { add() }) {
+                Canvas(Modifier.fillMaxSize().padding(16.dp)) { val g = 6.dp.toPx(); var y = g / 2
+                    while (y < size.height) { var x = g / 2; while (x < size.width) { drawCircle(Dim, 1.2f.dp.toPx(), Offset(x, y)); x += g }; y += g } } }
+            Box(Modifier.size(56.dp).press { use24 = !use24 }, Alignment.Center) {
+                Canvas(Modifier.fillMaxSize()) { drawCircle(Line, size.minDimension / 2 - 1.dp.toPx(), style = Stroke(1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 6f)))) }
+                Box(Modifier.size(22.dp).background(Ink, RoundedCornerShape(6.dp)), Alignment.Center) { Box(Modifier.size(7.dp).background(Color.Black, CircleShape)) } }
         }
     }
 }
