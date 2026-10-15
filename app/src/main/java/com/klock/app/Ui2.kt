@@ -30,15 +30,15 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.*
 
-data class City(val name: String, val region: String, val tz: String, val lat: Double, val lon: Double)
-val CITIES = listOf(City("Toronto", "Ontario, Canada", "America/Toronto", 43.65, -79.38), City("New York", "New York, USA", "America/New_York", 40.71, -74.01),
+data class City(val name: String, val region: String, val tz: String, val lat: Double, val lon: Double, val r: Float = 3f)
+var CITIES: List<City> = listOf(City("Toronto", "Ontario, Canada", "America/Toronto", 43.65, -79.38), City("New York", "New York, USA", "America/New_York", 40.71, -74.01),
     City("Los Angeles", "California, USA", "America/Los_Angeles", 34.05, -118.24), City("London", "England, UK", "Europe/London", 51.51, -0.13),
     City("Paris", "Île-de-France, France", "Europe/Paris", 48.86, 2.35), City("Cairo", "Cairo, Egypt", "Africa/Cairo", 30.04, 31.24),
     City("Dubai", "Dubai, UAE", "Asia/Dubai", 25.2, 55.27), City("Mumbai", "Maharashtra, India", "Asia/Kolkata", 19.08, 72.88),
     City("Jakarta", "Jakarta, Indonesia", "Asia/Jakarta", -6.2, 106.82), City("Singapore", "Singapore", "Asia/Singapore", 1.35, 103.82),
     City("Tokyo", "Tokyo, Japan", "Asia/Tokyo", 35.68, 139.69), City("Sydney", "New South Wales, Australia", "Australia/Sydney", -33.87, 151.21))
-val LOCAL: City = ZoneId.systemDefault().id.let { id -> CITIES.firstOrNull { it.tz == id } ?: City(id.substringAfter('/').replace('_', ' '), id.substringBefore('/', ""), id, Double.NaN, Double.NaN) }
-val ALL: List<City> = if (LOCAL in CITIES) CITIES else listOf(LOCAL) + CITIES
+var LOCAL: City = ZoneId.systemDefault().id.let { id -> CITIES.firstOrNull { it.tz == id } ?: City(id.substringAfter('/').replace('_', ' '), id.substringBefore('/', ""), id, Double.NaN, Double.NaN) }
+var ALL: List<City> = if (LOCAL in CITIES) CITIES else listOf(LOCAL) + CITIES
 fun cityOf(n: String) = ALL.firstOrNull { it.name == n } ?: LOCAL
 
 object S {
@@ -127,14 +127,14 @@ val RED = Color(0xFFE5483B)
 }
 
 @Composable fun App2() {
-    val c = LocalContext.current; remember { S.load(c); 0 }
+    val c = LocalContext.current; remember { Atlas.load(c); S.load(c); 0 }
     val d = dk(); var tab by remember { mutableStateOf(1) }; var layer by remember { mutableStateOf(0) }
     val alarms = remember { mutableStateListOf<AlarmItem>().apply { addAll(Alarms.load(c)) } }
     BackHandler(layer != 0) { layer = if (layer == 2) 1 else 0 }
     MaterialTheme(colorScheme = if (d) darkColorScheme() else lightColorScheme()) {
         Box(Modifier.fillMaxSize().background(bgC(d))) {
             AnimatedContent(tab, Modifier.fillMaxSize(), transitionSpec = { (fadeIn(spring(stiffness = 300f)) + scaleIn(initialScale = 0.96f)) togetherWith fadeOut(tween(150)) }, label = "tab") {
-                when (it) { 0 -> SearchTab { tab = 1 }; 1 -> ClockMain({ layer = 1 }, { layer = 3 }); 2 -> GlobeTab { tab = 1 }; else -> SettingsTab() } }
+                when (it) { 0 -> SearchTab { tab = 1 }; 1 -> ClockMain({ layer = 1 }, { layer = 3 }); 2 -> GlobeTab2({ tab = 0 }) { tab = 1 }; else -> SettingsTab { layer = 4 } } }
             val nd = tab == 1 || d
             Row(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(16.dp).clip(CircleShape)
                 .background(if (S.glass) Color.White.copy(.16f) else if (nd) Color(0xFF2B2B2D) else Color(0xFFDCD9CE)).border(1.dp, if (S.glass) Color.White.copy(.3f) else Color.Transparent, CircleShape).padding(5.dp), Arrangement.spacedBy(4.dp)) {
@@ -147,12 +147,13 @@ val RED = Color(0xFFE5483B)
             AnimatedVisibility(layer == 1, Modifier.fillMaxSize(), enter, exit) { LaunchedEffect(Unit) { alarms.clear(); alarms.addAll(Alarms.load(c)) }; AlarmsLayer(alarms, { layer = 0 }) { layer = 2 } }
             AnimatedVisibility(layer == 2, Modifier.fillMaxSize(), enter, exit) { AddAlarm(alarms) { layer = 1 } }
             AnimatedVisibility(layer == 3, Modifier.fillMaxSize(), enter, exit) { ToolsLayer { layer = 0 } }
+            AnimatedVisibility(layer == 4, Modifier.fillMaxSize(), enter, exit) { WidgetLayer { layer = 0 } }
         }
     }
 }
 
 @Composable fun ClockMain(openAlarms: () -> Unit, openTools: () -> Unit) {
-    val city = cityOf(S.cities[S.sel.coerceIn(0, S.cities.size - 1)]); val zone = ZoneId.of(city.tz)
+    val city = cityOf(S.cities[S.sel.coerceIn(0, S.cities.size - 1)]); val zone = zid(city.tz)
     var now by remember(city) { mutableStateOf(ZonedDateTime.now(zone)) }
     LaunchedEffect(city) { while (true) { now = ZonedDateTime.now(zone); delay(1000) } }
     var wx by remember(city) { mutableStateOf<Wx?>(null) }
@@ -197,7 +198,7 @@ val RED = Color(0xFFE5483B)
 @Composable fun SRow(l: String, o: List<String>, sel: Int, d: Boolean, set: (Int) -> Unit) = Row(Modifier.fillMaxWidth().padding(16.dp, 10.dp), Arrangement.SpaceBetween, Alignment.CenterVertically) {
     Text(l, color = fgC(d), fontSize = 15.sp); Seg(o, sel, d, set) }
 
-@Composable fun SettingsTab() {
+@Composable fun SettingsTab(openWidget: () -> Unit) {
     val d = dk()
     Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(20.dp, 24.dp, 20.dp, 110.dp)) {
         Text("Settings", fontSize = 36.sp, color = fgC(d)); Text("Display", color = dimC(d), fontSize = 12.sp, modifier = Modifier.padding(0.dp, 16.dp, 0.dp, 8.dp))
@@ -210,6 +211,8 @@ val RED = Color(0xFFE5483B)
             SRow("Time", listOf("12h", "24h"), if (use24) 1 else 0, d) { use24 = it == 1 }
             SRow("Temperature", listOf("Auto", "°C", "°F"), S.temp, d) { S.temp = it }
         }
+        Row(Modifier.padding(top = 12.dp).fillMaxWidth().background(cardC(d), RoundedCornerShape(20.dp)).press { openWidget() }.padding(16.dp, 18.dp), Arrangement.SpaceBetween) {
+            Text("Widget", color = fgC(d), fontSize = 15.sp); Text("Customize ›", color = dimC(d), fontSize = 14.sp) }
     }
 }
 
@@ -233,7 +236,7 @@ val RED = Color(0xFFE5483B)
     Column(Modifier.fillMaxSize().statusBarsPadding().padding(20.dp, 24.dp, 20.dp, 0.dp)) {
         Text("World Time", fontSize = 36.sp, color = fgC(d)); Spacer(Modifier.height(16.dp))
         LazyColumn(contentPadding = PaddingValues(bottom = 110.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            itemsIndexed(S.cities.toList(), key = { _, n -> n }) { i, n -> val ct = cityOf(n); val t = now.withZoneSameInstant(ZoneId.of(ct.tz)); val diff = (t.offset.totalSeconds - now.offset.totalSeconds) / 3600f
+            itemsIndexed(S.cities.toList(), key = { _, n -> n }) { i, n -> val ct = cityOf(n); val t = now.withZoneSameInstant(zid(ct.tz)); val diff = (t.offset.totalSeconds - now.offset.totalSeconds) / 3600f
                 Row(Modifier.animateItemPlacement().enter(i).fillMaxWidth().background(if (i == S.sel) fgC(d) else cardC(d), RoundedCornerShape(24.dp))
                     .press({ if (S.cities.size > 1) { S.cities.remove(n); S.sel = 0; S.save() } }) { S.sel = i; S.save(); go() }.padding(20.dp), Arrangement.SpaceBetween, Alignment.CenterVertically) {
                     val f = if (i == S.sel) bgC(d) else fgC(d)
@@ -254,7 +257,7 @@ val RED = Color(0xFFE5483B)
         if (snap.isEmpty()) Text("Wake up on any city's time.", color = dimC(d))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             items(snap.size, key = { snap[it].id }) { i -> val a = snap[i]; val ct = cityOf(a.city.ifBlank { LOCAL.name })
-                val t = ZonedDateTime.now().withHour(a.h).withMinute(a.m).withZoneSameInstant(ZoneId.of(ct.tz)); val hf = t.hour + t.minute / 60f
+                val t = ZonedDateTime.now().withHour(a.h).withMinute(a.m).withZoneSameInstant(zid(ct.tz)); val hf = t.hour + t.minute / 60f
                 Row(Modifier.animateItemPlacement().enter(i).fillMaxWidth().alpha(if (a.on) 1f else .5f).background(cardC(d), RoundedCornerShape(24.dp))
                     .press({ Alarms.cancel(c, a.id); alarms.remove(a); Alarms.save(c, alarms.toList()) }) { alarms[alarms.indexOf(a)] = a.copy(on = !a.on); Alarms.save(c, alarms.toList()) }.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                     Canvas(Modifier.size(56.dp).clip(RoundedCornerShape(14.dp))) { val (s1, s2) = sky(hf); drawRect(Brush.verticalGradient(listOf(s1, s2))); scene(hf, S.ink, hf < 6f || hf >= 18.5f) }
@@ -266,7 +269,7 @@ val RED = Color(0xFFE5483B)
 
 @Composable fun AddAlarm(alarms: MutableList<AlarmItem>, close: () -> Unit) {
     val c = LocalContext.current; val hp = LocalHapticFeedback.current; val dens = LocalDensity.current.density
-    var city by remember { mutableStateOf(S.cities[S.sel.coerceIn(0, S.cities.size - 1)]) }; val z = ZoneId.of(cityOf(city).tz)
+    var city by remember { mutableStateOf(S.cities[S.sel.coerceIn(0, S.cities.size - 1)]) }; val z = zid(cityOf(city).tz)
     var mins by remember { mutableStateOf(ZonedDateTime.now(z).let { (it.hour * 60 + it.minute) / 5 * 5 + 60 } % 1440) }
     var label by remember { mutableStateOf("") }; var days by remember { mutableStateOf(0) }; var dLabel by remember { mutableStateOf(false) }; var dCity by remember { mutableStateOf(false) }
     val now = ZonedDateTime.now(z); var target = now.withHour(mins / 60).withMinute(mins % 60).withSecond(0).withNano(0); if (!target.isAfter(now)) target = target.plusDays(1)

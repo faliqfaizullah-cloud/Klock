@@ -1,0 +1,105 @@
+Ottawa|Canada|America/Toronto|45.42|-75.70|10
+Washington D.C.|United States|America/New_York|38.90|-77.04|10
+Mexico City|Mexico|America/Mexico_City|19.43|-99.13|6
+Havana|Cuba|America/Havana|23.11|-82.37|3
+Panama City|Panama|America/Panama|8.98|-79.52|2.5
+Guatemala City|Guatemala|America/Guatemala|14.63|-90.51|2.5
+San Jose|Costa Rica|America/Costa_Rica|9.93|-84.08|2
+Kingston|Jamaica|America/Jamaica|18.00|-76.79|1.5
+Brasilia|Brazil|America/Sao_Paulo|-15.79|-47.88|10
+Buenos Aires|Argentina|America/Argentina/Buenos_Aires|-34.60|-58.38|8
+Santiago|Chile|America/Santiago|-33.45|-70.67|8
+Lima|Peru|America/Lima|-12.05|-77.04|6
+Bogota|Colombia|America/Bogota|4.71|-74.07|5
+Caracas|Venezuela|America/Caracas|10.48|-66.90|4
+Quito|Ecuador|America/Guayaquil|-0.18|-78.47|2.5
+La Paz|Bolivia|America/La_Paz|-16.50|-68.15|5
+Montevideo|Uruguay|America/Montevideo|-34.90|-56.19|2.5
+Asuncion|Paraguay|America/Asuncion|-25.26|-57.58|3.5
+London|United Kingdom|Europe/London|51.51|-0.13|3
+Dublin|Ireland|Europe/Dublin|53.35|-6.26|2
+Lisbon|Portugal|Europe/Lisbon|38.72|-9.14|2
+Madrid|Spain|Europe/Madrid|40.42|-3.70|4
+Paris|France|Europe/Paris|48.86|2.35|4
+Brussels|Belgium|Europe/Brussels|50.85|4.35|1.5
+Amsterdam|Netherlands|Europe/Amsterdam|52.37|4.90|1.5
+Berlin|Germany|Europe/Berlin|52.52|13.40|4
+Bern|Switzerland|Europe/Zurich|46.95|7.45|1.5
+Rome|Italy|Europe/Rome|41.90|12.50|4
+Vienna|Austria|Europe/Vienna|48.21|16.37|2
+Prague|Czechia|Europe/Prague|50.08|14.44|2
+Warsaw|Poland|Europe/Warsaw|52.23|21.01|3
+Budapest|Hungary|Europe/Budapest|47.50|19.04|2
+Copenhagen|Denmark|Europe/Copenhagen|55.68|12.57|1.5
+Oslo|Norway|Europe/Oslo|59.91|10.75|5
+Stockholm|Sweden|Europe/Stockholm|59.33|18.07|5
+Helsinki|Finland|Europe/Helsinki|60.17|24.94|4
+Reykjavik|Iceland|Atlantic/Reykjavik|64.15|-21.94|3
+Athens|Greece|Europe/Athens|37.98|23.73|3
+Bucharest|Romania|Europe/Bucharest|44.43|26.10|3
+Kyiv|Ukraine|Europe/Kiev|50.45|30.52|5
+Moscow|Russia|Europe/Moscow|55.76|37.62|12
+Minsk|Belarus|Europe/Minsk|53.90|27.57|3
+Ankara|Turkiye|Europe/Istanbul|39.93|32.86|5
+Cairo|Egypt|Africa/Cairo|30.04|31.24|5
+Rabat|Morocco|Africa/Casablanca|34.02|-6.83|4
+Algiers|Algeria|Africa/Algiers|36.75|3.06|8
+Tunis|Tunisia|Africa/Tunis|36.81|10.18|2.5
+Tripoli|Libya|Africa/Tripoli|32.89|13.19|7
+Khartoum|Sudan|Africa/Khartoum|15.50|32.56|6
+Addis Ababa|Ethiopia|Africa/Addis_Ababa|9.03|38.74|5
+Nairobi|Kenya|Africa/Nairobi|-1.29|36.82|3.5
+Dodoma|Tanzania|Africa/Dar_es_Salaam|-6.16|35.75|4
+Kampala|Uganda|Africa/Kampala|0.35|32.58|2.5
+Kinshasa|DR Congo|Africa/Kinshasa|-4.44|15.27|7
+Luanda|Angola|Africa/Luanda|-8.84|13.23|5
+Lusaka|Zambia|Africa/Lusaka|-15.39|28.32|4
+Harare|Zimbabwe|Africa/Harare|-17.83|31.05|3
+Pretoria|South Africa|Africa/Johannesburg|-25.75|28.19|5.5
+Windhoek|Namibia|Africa/Windhoek|-22.56|17.08|4.5
+Abuja|Nigeria|Africa/Lagos|9.08|7.40|4
+Accra|Ghana|Africa/Accra|5.60|-0.19|2.5
+Dakar|Senegal|Africa/Dakar|14.72|-17.47|2.5
+Yamoussoukro|Cote d'Ivoire|Africa/Abidjan|6.82|-5.28|2.5
+Antananarivo|Madagascar|Indian/Antananarivo|-18.88|47.51|4
+Maputo|Mozambique|Africa/Maputo|-25.97|32.57|5
+Riyadh|Saudi Arabia|Asia/Riyadh|24.71|46.68|7
+Abu Dhabi|United Arab Emirates|Asia/Dubai|24.45|54.38|2.5
+Doha|Qatar|Asia/Qatar|25.29|51.53|1.5
+Kuwait City|Kuwait|Asia/Kuwait|29.38|47.99|1.5
+Muscat|Oman|Asia/Muscat|23.59|58.41|3
+Baghdad|Iraq|Asia/Baghdad|33.31|44.36|4
+Tehran|Iran|Asia/Tehran|35.69|51.39|6
+Jerusalem|Israel|Asia/Jerusalem|31.77|35.22|1.5
+Amman|Jordan|Asia/Amman|31.95|35.93|2
+Beirut|Lebanon|Asia/Beirut|33.89|35.50|1.2
+Damascus|Syria|Asia/Damascus|33.51|36.29|2.5
+Kabul|Afghanistan|Asia/Kabul|34.53|69.17|4
+Islamabad|Pakistan|Asia/Karachi|33.69|73.05|5
+New Delhi|India|Asia/Kolkata|28.61|77.21|8
+Dhaka|Bangladesh|Asia/Dhaka|23.81|90.41|2.5
+Kathmandu|Nepal|Asia/Kathmandu|27.72|85.32|2.5
+Colombo|Sri Lanka|Asia/Colombo|6.93|79.86|2
+Tashkent|Uzbekistan|Asia/Tashkent|41.30|69.24|5
+Astana|Kazakhstan|Asia/Almaty|51.17|71.45|10
+Bangkok|Thailand|Asia/Bangkok|13.76|100.50|4
+Hanoi|Vietnam|Asia/Ho_Chi_Minh|21.03|105.85|3.5
+Phnom Penh|Cambodia|Asia/Phnom_Penh|11.56|104.93|2.5
+Kuala Lumpur|Malaysia|Asia/Kuala_Lumpur|3.14|101.69|2.5
+Singapore|Singapore|Asia/Singapore|1.35|103.82|1
+Jakarta|Indonesia|Asia/Jakarta|-6.21|106.85|3
+Manila|Philippines|Asia/Manila|14.60|120.98|3
+Beijing|China|Asia/Shanghai|39.90|116.41|10
+Tokyo|Japan|Asia/Tokyo|35.68|139.69|4
+Seoul|South Korea|Asia/Seoul|37.57|126.98|2
+Pyongyang|North Korea|Asia/Pyongyang|39.02|125.75|2
+Ulaanbaatar|Mongolia|Asia/Ulaanbaatar|47.89|106.91|7
+Taipei|Taiwan|Asia/Taipei|25.03|121.57|1.2
+Naypyidaw|Myanmar|Asia/Yangon|19.76|96.08|4
+Baku|Azerbaijan|Asia/Baku|40.41|49.87|1.8
+Tbilisi|Georgia|Asia/Tbilisi|41.72|44.79|1.8
+Yerevan|Armenia|Asia/Yerevan|40.18|44.51|1.2
+Canberra|Australia|Australia/Sydney|-35.28|149.13|9
+Wellington|New Zealand|Pacific/Auckland|-41.29|174.78|3
+Port Moresby|Papua New Guinea|Pacific/Port_Moresby|-9.44|147.18|3.5
+Suva|Fiji|Pacific/Fiji|-18.14|178.44|1
