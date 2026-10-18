@@ -146,7 +146,7 @@ val PRESETS = listOf(WCfg(8f, 0, true, true), WCfg(8f, 1, true, false), WCfg(210
         Row(Modifier.padding(top = 20.dp).fillMaxWidth(), Arrangement.spacedBy(10.dp)) {
             Text("Reset", Modifier.background(card, CircleShape).press { cfg = WCfg() }.padding(22.dp, 14.dp), color = fg)
             Text("Add to home", Modifier.background(card, CircleShape).press { val m = AppWidgetManager.getInstance(c)
-                if (m.isRequestPinAppWidgetSupported) m.requestPinAppWidget(ComponentName(c, ClockWidget::class.java), null, null) else msg = "Long-press your home screen and add the Klock widget." }.padding(22.dp, 14.dp), color = fg)
+                if (m.isRequestPinAppWidgetSupported) m.requestPinAppWidget(ComponentName(c, ClockWidget::class.java), null, null) else { msg = "Long-press your home screen and add the Klock widget." } }.padding(22.dp, 14.dp), color = fg)
             Spacer(Modifier.weight(1f))
             Text("Save", Modifier.background(fg, CircleShape).press { WStore.set(c, cfg); refreshWidgets(c); msg = "Saved. Your widget is updated." }.padding(28.dp, 14.dp), color = bgC(d), fontWeight = FontWeight.Medium)
         }
