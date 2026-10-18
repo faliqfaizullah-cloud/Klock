@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
         val t = android.graphics.Color.TRANSPARENT
         enableEdgeToEdge(SystemBarStyle.dark(t), SystemBarStyle.dark(t))
         requestPermissions(arrayOf("android.permission.POST_NOTIFICATIONS"), 0)
-        setContent { App2() }
+        setContent { var splash by remember { mutableStateOf(true) }; Crossfade(splash, animationSpec = tween(500), label = "splash") { sp -> if (sp) Splash { splash = false } else App2() } }
     }
 }
 
