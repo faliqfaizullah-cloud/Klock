@@ -108,10 +108,10 @@ fun DrawScope.scene(hf: Float, ink: Boolean, night: Boolean) {
 }
 
 @Composable fun dk(): Boolean = when (S.appearance) { 1 -> false; 2 -> true; else -> isSystemInDarkTheme() }
-fun bgC(d: Boolean) = if (d) Color(0xFF0F0F10) else Color(0xFFEDEAE0)
+fun bgC(d: Boolean) = if (d) Color.Black else Color(0xFFE3E3E3)
 fun fgC(d: Boolean) = if (d) Color.White else Color(0xFF161616)
-fun cardC(d: Boolean) = if (d) Color(0xFF1C1C1E) else Color(0xFFF6F4EC)
-fun dimC(d: Boolean) = if (d) Color(0xFF8C8C8C) else Color(0xFF8A877C)
+fun cardC(d: Boolean) = if (d) Color(0xFF141414) else Color(0xFFF4F4F4)
+fun dimC(d: Boolean) = if (d) Color(0xFF777777) else Color(0xFF9A9A9A)
 fun hh(h: Int) = two(if (use24) h else (h + 11) % 12 + 1)
 val RED = Color(0xFFE5483B)
 
@@ -129,23 +129,22 @@ val RED = Color(0xFFE5483B)
 @Composable fun App2() {
     val c = LocalContext.current; remember { Atlas.load(c); S.load(c); 0 }
     val d = dk(); var tab by remember { mutableStateOf(1) }; var layer by remember { mutableStateOf(0) }
-    val alarms = remember { mutableStateListOf<AlarmItem>().apply { addAll(Alarms.load(c)) } }
-    BackHandler(layer != 0) { layer = if (layer == 2) 1 else 0 }
+    val alarms = remember { mutableStateListOf<AlarmItem>().apply { addAll(Alarms.load(c)) } }; var editing by remember { mutableStateOf<AlarmItem?>(null) }
+    BackHandler(layer != 0) { layer = 0 }
     MaterialTheme(colorScheme = if (d) darkColorScheme() else lightColorScheme()) {
         Box(Modifier.fillMaxSize().background(bgC(d))) {
-            AnimatedContent(tab, Modifier.fillMaxSize(), transitionSpec = { (fadeIn(spring(stiffness = 300f)) + scaleIn(initialScale = 0.96f)) togetherWith fadeOut(tween(150)) }, label = "tab") {
-                when (it) { 0 -> SearchTab { tab = 1 }; 1 -> ClockMain({ layer = 1 }, { layer = 3 }); 2 -> GlobeTab2({ tab = 0 }) { tab = 1 }; else -> SettingsTab { layer = 4 } } }
-            val nd = tab == 1 || d
-            Row(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(16.dp).clip(CircleShape)
-                .background(if (S.glass) Color.White.copy(.16f) else if (nd) Color(0xFF2B2B2D) else Color(0xFFDCD9CE)).border(1.dp, if (S.glass) Color.White.copy(.3f) else Color.Transparent, CircleShape).padding(5.dp), Arrangement.spacedBy(4.dp)) {
-                repeat(4) { i -> val on = i == tab
-                    val bg by animateColorAsState(if (on) (if (nd) Color.White else Color(0xFF111111)) else Color.Transparent, label = "nb")
-                    val sc by animateFloatAsState(if (on) 1.05f else 1f, spring(.5f, 500f), label = "ns")
-                    Box(Modifier.size(46.dp).scale(sc).background(bg, CircleShape).press { tab = i }, Alignment.Center) { Ico2(i, if (on) (if (nd) Color.Black else Color.White) else (if (nd) Color.White else Color(0xFF111111))) } }
+            AnimatedContent(tab, Modifier.fillMaxSize(), transitionSpec = { (fadeIn(spring(stiffness = 300f)) + scaleIn(initialScale = 0.96f)) togetherWith fadeOut(tween(150)) }, label = "tab") { t ->
+                when (t) { 0 -> SearchTab { tab = 1 }; 1 -> AlarmHome(alarms) { a -> editing = a; layer = 2 }; 2 -> GlobeTab2({ tab = 0 }) { tab = 1 }; else -> SettingsTab { layer = 4 } } }
+            Row(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(16.dp).fillMaxWidth(), Arrangement.SpaceBetween, Alignment.CenterVertically) {
+                Box(Modifier.size(48.dp).background(cardC(d), CircleShape).border(1.dp, Line, CircleShape).press { layer = 3 }, Alignment.Center) { Ico(3, fgC(d), cardC(d)) }
+                Row(Modifier.clip(CircleShape).background(fgC(d)).padding(5.dp), Arrangement.spacedBy(2.dp)) {
+                    repeat(4) { i -> val on = i == tab; val bg by animateColorAsState(if (on) bgC(d).copy(.22f) else Color.Transparent, label = "nb")
+                        val sc by animateFloatAsState(if (on) 1.06f else 1f, spring(.5f, 500f), label = "ns")
+                        Box(Modifier.size(44.dp).scale(sc).background(bg, CircleShape).press { tab = i }, Alignment.Center) { Ico2(i, bgC(d)) } } }
+                Box(Modifier.size(48.dp).background(fgC(d), CircleShape).press { when (tab) { 1 -> { editing = null; layer = 2 }; 3 -> layer = 4; else -> tab = 0 } }, Alignment.Center) { Text("+", color = bgC(d), fontSize = 24.sp) }
             }
             val enter = slideInVertically(spring(0.85f, 300f)) { it } + fadeIn(); val exit = slideOutVertically { it } + fadeOut()
-            AnimatedVisibility(layer == 1, Modifier.fillMaxSize(), enter, exit) { LaunchedEffect(Unit) { alarms.clear(); alarms.addAll(Alarms.load(c)) }; AlarmsLayer(alarms, { layer = 0 }) { layer = 2 } }
-            AnimatedVisibility(layer == 2, Modifier.fillMaxSize(), enter, exit) { AddAlarm(alarms) { layer = 1 } }
+            AnimatedVisibility(layer == 2, Modifier.fillMaxSize(), enter, exit) { AlarmEditor(alarms, editing) { layer = 0 } }
             AnimatedVisibility(layer == 3, Modifier.fillMaxSize(), enter, exit) { ToolsLayer { layer = 0 } }
             AnimatedVisibility(layer == 4, Modifier.fillMaxSize(), enter, exit) { WidgetLayer { layer = 0 } }
         }
@@ -190,7 +189,7 @@ val RED = Color(0xFFE5483B)
     }
 }
 
-@Composable fun Seg(o: List<String>, sel: Int, d: Boolean, set: (Int) -> Unit) = Row(Modifier.background(if (d) Color(0xFF2A2A2C) else Color(0xFFE4E1D6), CircleShape).padding(3.dp)) {
+@Composable fun Seg(o: List<String>, sel: Int, d: Boolean, set: (Int) -> Unit) = Row(Modifier.background(if (d) Color(0xFF2A2A2C) else Color(0xFFD2D2D2), CircleShape).padding(3.dp)) {
     o.forEachIndexed { i, t -> val on = i == sel
         val bg by animateColorAsState(if (on) fgC(d) else Color.Transparent, label = "g")
         Text(t, Modifier.background(bg, CircleShape).press { set(i); S.save() }.padding(12.dp, 6.dp), color = if (on) bgC(d) else fgC(d), fontSize = 13.sp) }
