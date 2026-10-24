@@ -113,7 +113,7 @@ class MainActivity : ComponentActivity() {
 }
 @Composable fun Pill(t: String, main: Boolean = true, f: () -> Unit) = Text(t, Modifier.background(if (main) Ink else Chip, CircleShape).border(1.dp, Line, CircleShape).press(null, f).padding(28.dp, 16.dp),
     color = if (main) Color.Black else Ink, fontWeight = FontWeight.Medium)
-fun utc(t: ZonedDateTime): String { val o = t.offset.totalSeconds / 3600f; return "UTC" + if (o % 1f == 0f) "%+d".format(o.toInt()) else "%+.1f".format(o) }
+fun utc(t: ZonedDateTime): String { val o = t.offset.totalSeconds; val a = Math.abs(o); return "UTC" + (if (o < 0) "-" else "+") + (a / 3600) + (if (a % 3600 != 0) ":" + two(a % 3600 / 60) else "") }
 
 @Composable fun ClockScreen() {
     var now by remember { mutableStateOf(ZonedDateTime.now()) }

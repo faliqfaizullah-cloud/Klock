@@ -103,3 +103,119 @@ Canberra|Australia|Australia/Sydney|-35.28|149.13|9
 Wellington|New Zealand|Pacific/Auckland|-41.29|174.78|3
 Port Moresby|Papua New Guinea|Pacific/Port_Moresby|-9.44|147.18|3.5
 Suva|Fiji|Pacific/Fiji|-18.14|178.44|1
+Nassau|Bahamas|America/Nassau|25.05|-77.35|2
+Port-au-Prince|Haiti|America/Port-au-Prince|18.54|-72.34|2
+Santo Domingo|Dominican Republic|America/Santo_Domingo|18.49|-69.93|2
+Tegucigalpa|Honduras|America/Tegucigalpa|14.07|-87.19|2.5
+Managua|Nicaragua|America/Managua|12.13|-86.25|2.5
+San Salvador|El Salvador|America/El_Salvador|13.69|-89.19|1.5
+Belmopan|Belize|America/Belize|17.25|-88.77|1.5
+Bridgetown|Barbados|America/Barbados|13.10|-59.61|1
+Port of Spain|Trinidad and Tobago|America/Port_of_Spain|10.66|-61.51|1
+Georgetown|Guyana|America/Guyana|6.80|-58.16|3
+Paramaribo|Suriname|America/Paramaribo|5.85|-55.20|2.5
+Nuuk|Greenland|America/Godthab|64.18|-51.72|8
+Luxembourg|Luxembourg|Europe/Luxembourg|49.61|6.13|0.8
+Valletta|Malta|Europe/Malta|35.90|14.51|0.6
+Nicosia|Cyprus|Asia/Nicosia|35.19|33.38|1
+Sofia|Bulgaria|Europe/Sofia|42.70|23.32|2.2
+Belgrade|Serbia|Europe/Belgrade|44.79|20.45|1.8
+Zagreb|Croatia|Europe/Zagreb|45.81|15.98|1.8
+Ljubljana|Slovenia|Europe/Ljubljana|46.06|14.51|1
+Bratislava|Slovakia|Europe/Bratislava|48.15|17.11|1.5
+Sarajevo|Bosnia and Herzegovina|Europe/Sarajevo|43.86|18.41|1.5
+Skopje|North Macedonia|Europe/Skopje|41.99|21.43|1
+Tirana|Albania|Europe/Tirane|41.33|19.82|1.2
+Podgorica|Montenegro|Europe/Podgorica|42.44|19.26|0.8
+Pristina|Kosovo|Europe/Belgrade|42.67|21.17|0.7
+Chisinau|Moldova|Europe/Chisinau|47.01|28.86|1.5
+Vilnius|Lithuania|Europe/Vilnius|54.69|25.28|1.5
+Riga|Latvia|Europe/Riga|56.95|24.11|1.5
+Tallinn|Estonia|Europe/Tallinn|59.44|24.75|1.5
+Vaduz|Liechtenstein|Europe/Vaduz|47.14|9.52|0.4
+Monaco|Monaco|Europe/Monaco|43.74|7.42|0.3
+Andorra la Vella|Andorra|Europe/Andorra|42.51|1.52|0.4
+San Marino|San Marino|Europe/San_Marino|43.94|12.45|0.3
+Vatican City|Vatican City|Europe/Vatican|41.90|12.45|0.2
+Nouakchott|Mauritania|Africa/Nouakchott|18.09|-15.98|6
+Bamako|Mali|Africa/Bamako|12.64|-8.00|6
+Niamey|Niger|Africa/Niamey|13.51|2.11|6
+N'Djamena|Chad|Africa/Ndjamena|12.13|15.05|6
+Ouagadougou|Burkina Faso|Africa/Ouagadougou|12.37|-1.52|3
+Conakry|Guinea|Africa/Conakry|9.64|-13.58|2.5
+Freetown|Sierra Leone|Africa/Freetown|8.48|-13.23|1.8
+Monrovia|Liberia|Africa/Monrovia|6.30|-10.80|2
+Lome|Togo|Africa/Lome|6.13|1.22|1.5
+Porto-Novo|Benin|Africa/Porto-Novo|6.50|2.60|1.8
+Yaounde|Cameroon|Africa/Douala|3.85|11.50|3.5
+Bangui|Central African Republic|Africa/Bangui|4.36|18.56|4
+Libreville|Gabon|Africa/Libreville|0.39|9.45|2.5
+Brazzaville|Republic of the Congo|Africa/Brazzaville|-4.27|15.28|3
+Malabo|Equatorial Guinea|Africa/Malabo|3.75|8.78|1
+Bissau|Guinea-Bissau|Africa/Bissau|11.86|-15.60|1.2
+Banjul|Gambia|Africa/Banjul|13.45|-16.58|0.8
+Praia|Cape Verde|Atlantic/Cape_Verde|14.93|-23.51|0.8
+Asmara|Eritrea|Africa/Asmara|15.34|38.93|2
+Djibouti|Djibouti|Africa/Djibouti|11.59|43.15|0.8
+Mogadishu|Somalia|Africa/Mogadishu|2.05|45.32|5
+Juba|South Sudan|Africa/Juba|4.85|31.58|4
+Kigali|Rwanda|Africa/Kigali|-1.95|30.06|1
+Gitega|Burundi|Africa/Bujumbura|-3.43|29.93|1
+Lilongwe|Malawi|Africa/Blantyre|-13.96|33.77|2
+Gaborone|Botswana|Africa/Gaborone|-24.65|25.91|4
+Maseru|Lesotho|Africa/Maseru|-29.31|27.48|1
+Mbabane|Eswatini|Africa/Mbabane|-26.32|31.14|0.8
+Port Louis|Mauritius|Indian/Mauritius|-20.16|57.50|0.6
+Moroni|Comoros|Indian/Comoro|-11.70|43.26|0.5
+Victoria|Seychelles|Indian/Mahe|-4.62|55.45|0.5
+Sao Tome|Sao Tome and Principe|Africa/Sao_Tome|0.34|6.73|0.5
+Manama|Bahrain|Asia/Bahrain|26.23|50.59|0.6
+Sanaa|Yemen|Asia/Aden|15.35|44.21|4
+Thimphu|Bhutan|Asia/Thimphu|27.47|89.64|1.5
+Male|Maldives|Indian/Maldives|4.18|73.51|0.8
+Bishkek|Kyrgyzstan|Asia/Bishkek|42.87|74.59|3
+Dushanbe|Tajikistan|Asia/Dushanbe|38.56|68.79|2.5
+Ashgabat|Turkmenistan|Asia/Ashgabat|37.96|58.33|4
+Vientiane|Laos|Asia/Vientiane|17.97|102.60|3
+Bandar Seri Begawan|Brunei|Asia/Brunei|4.94|114.95|0.8
+Dili|Timor-Leste|Asia/Dili|-8.56|125.57|0.8
+Nuku'alofa|Tonga|Pacific/Tongatapu|-21.14|-175.20|0.6
+Apia|Samoa|Pacific/Apia|-13.83|-171.76|0.8
+Port Vila|Vanuatu|Pacific/Efate|-17.73|168.32|0.8
+Honiara|Solomon Islands|Pacific/Guadalcanal|-9.43|159.95|1.5
+Tarawa|Kiribati|Pacific/Tarawa|1.45|173.03|0.5
+Majuro|Marshall Islands|Pacific/Majuro|7.09|171.38|0.5
+Palikir|Micronesia|Pacific/Pohnpei|6.92|158.16|0.5
+Ngerulmud|Palau|Pacific/Palau|7.50|134.62|0.5
+Funafuti|Tuvalu|Pacific/Funafuti|-8.52|179.20|0.4
+Yaren|Nauru|Pacific/Nauru|-0.55|166.92|0.3
+Los Angeles|USA (Pacific)|America/Los_Angeles|34.05|-118.24|3
+Denver|USA (Mountain)|America/Denver|39.74|-104.99|3
+Chicago|USA (Central)|America/Chicago|41.88|-87.63|3
+Anchorage|USA (Alaska)|America/Anchorage|61.22|-149.90|4
+Honolulu|USA (Hawaii)|Pacific/Honolulu|21.31|-157.86|1.5
+Vancouver|Canada (Pacific)|America/Vancouver|49.28|-123.12|3
+Edmonton|Canada (Mountain)|America/Edmonton|53.55|-113.49|3
+Winnipeg|Canada (Central)|America/Winnipeg|49.90|-97.14|3
+Halifax|Canada (Atlantic)|America/Halifax|44.65|-63.58|2
+St. John's|Canada (Newfoundland)|America/St_Johns|47.56|-52.71|1.5
+Tijuana|Mexico (Northwest)|America/Tijuana|32.51|-117.04|1.5
+Cancun|Mexico (Southeast)|America/Cancun|21.16|-86.85|1.5
+Manaus|Brazil (Amazon)|America/Manaus|-3.12|-60.02|4
+Rio Branco|Brazil (Acre)|America/Rio_Branco|-9.97|-67.81|2.5
+Perth|Australia (West)|Australia/Perth|-31.95|115.86|5
+Darwin|Australia (Central)|Australia/Darwin|-12.46|130.84|4
+Adelaide|Australia (South)|Australia/Adelaide|-34.93|138.60|3
+Brisbane|Australia (Queensland)|Australia/Brisbane|-27.47|153.03|3
+Sydney|Australia (East)|Australia/Sydney|-33.87|151.21|2
+Kaliningrad|Russia (UTC+2)|Europe/Kaliningrad|54.71|20.51|1
+Yekaterinburg|Russia (UTC+5)|Asia/Yekaterinburg|56.84|60.60|6
+Novosibirsk|Russia (UTC+7)|Asia/Novosibirsk|55.03|82.92|6
+Krasnoyarsk|Russia (UTC+7)|Asia/Krasnoyarsk|56.01|92.87|6
+Irkutsk|Russia (UTC+8)|Asia/Irkutsk|52.29|104.30|6
+Yakutsk|Russia (UTC+9)|Asia/Yakutsk|62.04|129.74|6
+Vladivostok|Russia (UTC+10)|Asia/Vladivostok|43.12|131.89|4
+Magadan|Russia (UTC+11)|Asia/Magadan|59.56|150.80|4
+Petropavlovsk|Russia (UTC+12)|Asia/Kamchatka|53.04|158.65|4
+Canary Islands|Spain (Canary)|Atlantic/Canary|28.12|-15.43|1
+Azores|Portugal (Azores)|Atlantic/Azores|37.74|-25.67|1

@@ -62,7 +62,7 @@ object Prev { var r: android.media.Ringtone? = null
 
 @Composable fun AlarmHome(alarms: MutableList<AlarmItem>, onEdit: (AlarmItem?) -> Unit) {
     val c = LocalContext.current; val d = dk(); val fg = fgC(d); val dim = dimC(d); val hp = LocalHapticFeedback.current
-    var now by remember { mutableStateOf(LocalDateTime.now()) }; LaunchedEffect(Unit) { while (true) { now = LocalDateTime.now(); delay(1000) } }
+    var now by remember { mutableStateOf(LocalDateTime.now()) }; LaunchedEffect(Unit) { while (true) { now = LocalDateTime.now(); delay(1000L - System.currentTimeMillis() % 1000L) } }
     LaunchedEffect(Unit) { alarms.clear(); alarms.addAll(Alarms.load(c)) }
     val today = now.dayOfWeek.value - 1; var sel by remember { mutableStateOf(today) }
     val snap = alarms.toList(); val mins = snap.filter { it.on }.minOfOrNull { Alarms.nextAt(it) }?.let { (it - System.currentTimeMillis()) / 60000 }
@@ -71,8 +71,9 @@ object Prev { var r: android.media.Ringtone? = null
         Row(Modifier.fillMaxWidth().padding(top = 20.dp), Arrangement.SpaceBetween, Alignment.CenterVertically) {
             Text("Alarm", fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = fg)
             Text((if (use24) "24h" else "12h") + " ⌄", color = dim, fontSize = 14.sp, modifier = Modifier.press { use24 = !use24; S.save() }.padding(8.dp)) }
-        Text(buildAnnotatedString { withStyle(SpanStyle(color = fg)) { append(hh(now.hour)) }; withStyle(SpanStyle(color = dim.copy(alpha = .55f))) { append(":" + two(now.minute)) } },
-            Modifier.fillMaxWidth().padding(top = 28.dp), fontSize = 84.sp, fontWeight = FontWeight.Light, letterSpacing = (-4).sp, textAlign = TextAlign.Center)
+        Row(Modifier.fillMaxWidth().padding(top = 28.dp), Arrangement.Center, Alignment.Bottom) {
+            Text(buildAnnotatedString { withStyle(SpanStyle(color = fg)) { append(hh(now.hour)) }; withStyle(SpanStyle(color = dim.copy(alpha = .55f))) { append(":" + two(now.minute)) } }, fontSize = 84.sp, fontWeight = FontWeight.Light, letterSpacing = (-4).sp)
+            if (S.seconds) Text(":" + two(now.second), fontSize = 30.sp, fontWeight = FontWeight.Light, color = dim, modifier = Modifier.padding(start = 4.dp, bottom = 16.dp)) }
         Text(buildAnnotatedString { append(if (mins == null) "No alarm set" else "The next alarm clock in "); if (mins != null) withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = fg)) { append(if (mins < 60) "$mins min" else "${mins / 60}h ${mins % 60}m") } },
             Modifier.fillMaxWidth().padding(top = 6.dp), fontSize = 11.sp, color = dim, textAlign = TextAlign.Center)
         Box(Modifier.fillMaxWidth().padding(top = 18.dp).height(96.dp).clip(RoundedCornerShape(18.dp)).background(cardC(d))) {

@@ -7,11 +7,11 @@ import android.text.format.DateFormat
 import android.widget.RemoteViews
 import java.util.Calendar
 
-data class WCfg(val hue: Float = 100f, val style: Int = 0, val dial: Boolean = true, val moon: Boolean = true)
+data class WCfg(val hue: Float = 100f, val style: Int = 0, val dial: Boolean = true, val moon: Boolean = true, val sec: Boolean = true)
 class Pal(val dark: Boolean, val bgTop: Int, val bgBot: Int, val tick: Int, val num: Int, val hand: Int, val ink: Int, val dim: Int, val pill: Int, val acc: Int)
 object WStore {
-    fun get(c: Context) = c.getSharedPreferences("w", 0).let { WCfg(it.getFloat("h2", 100f), it.getInt("s2", 0), it.getBoolean("d2", true), it.getBoolean("m2", true)) }
-    fun set(c: Context, w: WCfg) { c.getSharedPreferences("w", 0).edit().putFloat("h2", w.hue).putInt("s2", w.style).putBoolean("d2", w.dial).putBoolean("m2", w.moon).apply() }
+    fun get(c: Context) = c.getSharedPreferences("w", 0).let { WCfg(it.getFloat("h2", 100f), it.getInt("s2", 0), it.getBoolean("d2", true), it.getBoolean("m2", true), it.getBoolean("x2", true)) }
+    fun set(c: Context, w: WCfg) { c.getSharedPreferences("w", 0).edit().putFloat("h2", w.hue).putInt("s2", w.style).putBoolean("d2", w.dial).putBoolean("m2", w.moon).putBoolean("x2", w.sec).apply() }
 }
 fun palOf(w: WCfg): Pal {
     val acc = Color.HSVToColor(floatArrayOf(w.hue, .7f, .82f))
@@ -60,7 +60,8 @@ class ClockWidget : AppWidgetProvider() {
             val v = RemoteViews(c.packageName, R.layout.widget_clock)
             v.setImageViewBitmap(R.id.dial, faceBitmap(c, w, h, cfg))
             v.setInt(R.id.pill, "setBackgroundResource", if (pl.dark) R.drawable.pill_dark else R.drawable.pill_light)
-            v.setTextColor(R.id.hourClk, pl.dim); v.setTextColor(R.id.minClk, pl.ink)
+            v.setTextColor(R.id.hourClk, pl.dim); v.setTextColor(R.id.minClk, pl.ink); v.setTextColor(R.id.secClk, pl.dim)
+            v.setViewVisibility(R.id.secClk, if (cfg.sec) android.view.View.VISIBLE else android.view.View.GONE)
             v.setOnClickPendingIntent(R.id.root, PendingIntent.getActivity(c, 0, Intent(c, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE))
             m.updateAppWidget(id, v)
         }

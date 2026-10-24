@@ -43,15 +43,15 @@ fun cityOf(n: String) = ALL.firstOrNull { it.name == n } ?: LOCAL
 
 object S {
     private lateinit var sp: SharedPreferences
-    var appearance by mutableStateOf(0); var ink by mutableStateOf(false); var glass by mutableStateOf(false); var temp by mutableStateOf(0); var sel by mutableStateOf(0)
+    var appearance by mutableStateOf(0); var ink by mutableStateOf(false); var glass by mutableStateOf(false); var temp by mutableStateOf(0); var sel by mutableStateOf(0); var seconds by mutableStateOf(true)
     val cities = mutableStateListOf<String>()
     fun load(c: Context) {
         sp = c.getSharedPreferences("k2", 0); appearance = sp.getInt("ap", 0); ink = sp.getBoolean("ink", false); glass = sp.getBoolean("gl", false)
-        temp = sp.getInt("tp", 0); sel = sp.getInt("sel", 0); use24 = sp.getBoolean("h24", true)
+        temp = sp.getInt("tp", 0); sel = sp.getInt("sel", 0); use24 = sp.getBoolean("h24", true); seconds = sp.getBoolean("sec", true)
         cities.clear(); cities.addAll(sp.getString("c", "")!!.split(";").filter { n -> ALL.any { it.name == n } })
         if (cities.isEmpty()) cities.add(LOCAL.name); if (sel !in cities.indices) sel = 0
     }
-    fun save() { sp.edit().putInt("ap", appearance).putBoolean("ink", ink).putBoolean("gl", glass).putInt("tp", temp).putInt("sel", sel).putBoolean("h24", use24).putString("c", cities.joinToString(";")).apply() }
+    fun save() { sp.edit().putInt("ap", appearance).putBoolean("ink", ink).putBoolean("gl", glass).putInt("tp", temp).putInt("sel", sel).putBoolean("h24", use24).putBoolean("sec", seconds).putString("c", cities.joinToString(";")).apply() }
 }
 
 data class Wx(val t: Double, val code: Int, val rise: String, val set: String)
@@ -154,7 +154,7 @@ val RED = Color(0xFFE5483B)
 @Composable fun ClockMain(openAlarms: () -> Unit, openTools: () -> Unit) {
     val city = cityOf(S.cities[S.sel.coerceIn(0, S.cities.size - 1)]); val zone = zid(city.tz)
     var now by remember(city) { mutableStateOf(ZonedDateTime.now(zone)) }
-    LaunchedEffect(city) { while (true) { now = ZonedDateTime.now(zone); delay(1000) } }
+    LaunchedEffect(city) { while (true) { now = ZonedDateTime.now(zone); delay(1000L - System.currentTimeMillis() % 1000L) } }
     var wx by remember(city) { mutableStateOf<Wx?>(null) }
     LaunchedEffect(city) { while (true) { fetchWx(city)?.let { wx = it }; delay(600_000) } }
     val hf = now.hour + now.minute / 60f; val code = wx?.code ?: 0; val night = hf < 6f || hf >= 18.5f
@@ -208,6 +208,7 @@ val RED = Color(0xFFE5483B)
         }
         Column(Modifier.padding(top = 12.dp).fillMaxWidth().background(cardC(d), RoundedCornerShape(20.dp))) {
             SRow("Time", listOf("12h", "24h"), if (use24) 1 else 0, d) { use24 = it == 1 }
+            SRow("Seconds", listOf("Off", "On"), if (S.seconds) 1 else 0, d) { S.seconds = it == 1 }
             SRow("Temperature", listOf("Auto", "°C", "°F"), S.temp, d) { S.temp = it }
         }
         Row(Modifier.padding(top = 12.dp).fillMaxWidth().background(cardC(d), RoundedCornerShape(20.dp)).press { openWidget() }.padding(16.dp, 18.dp), Arrangement.SpaceBetween) {
@@ -231,7 +232,7 @@ val RED = Color(0xFFE5483B)
 
 @Composable fun GlobeTab(go: () -> Unit) {
     val d = dk(); var now by remember { mutableStateOf(ZonedDateTime.now()) }
-    LaunchedEffect(Unit) { while (true) { now = ZonedDateTime.now(); delay(1000) } }
+    LaunchedEffect(Unit) { while (true) { now = ZonedDateTime.now(); delay(1000L - System.currentTimeMillis() % 1000L) } }
     Column(Modifier.fillMaxSize().statusBarsPadding().padding(20.dp, 24.dp, 20.dp, 0.dp)) {
         Text("World Time", fontSize = 36.sp, color = fgC(d)); Spacer(Modifier.height(16.dp))
         LazyColumn(contentPadding = PaddingValues(bottom = 110.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -240,7 +241,7 @@ val RED = Color(0xFFE5483B)
                     .press({ if (S.cities.size > 1) { S.cities.remove(n); S.sel = 0; S.save() } }) { S.sel = i; S.save(); go() }.padding(20.dp), Arrangement.SpaceBetween, Alignment.CenterVertically) {
                     val f = if (i == S.sel) bgC(d) else fgC(d)
                     Column { Text(ct.name, fontSize = 18.sp, color = f); Text((if (diff >= 0) "+" else "") + (if (diff % 1f == 0f) diff.toInt().toString() else diff.toString()) + "h from you", fontSize = 12.sp, color = f.copy(.6f)) }
-                    Text(hm(t.hour, t.minute), fontSize = 40.sp, letterSpacing = (-2).sp, color = f) } }
+                    Text(hms(t), fontSize = if (S.seconds) 32.sp else 40.sp, letterSpacing = (-2).sp, color = f) } }
             item { Text("Tap to open · long-press to remove", color = dimC(d), fontSize = 12.sp, modifier = Modifier.padding(8.dp)) }
         }
     }

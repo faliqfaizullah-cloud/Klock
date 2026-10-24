@@ -4,6 +4,7 @@
     android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="10dp" android:paddingEnd="10dp" android:paddingTop="4dp" android:paddingBottom="4dp" android:background="@drawable/pill_light">
     <TextClock android:id="@+id/hourClk" android:layout_width="wrap_content" android:layout_height="wrap_content" android:format12Hour="hh" android:format24Hour="HH" android:textSize="14sp" android:fontFamily="monospace" android:includeFontPadding="false" android:textColor="#FFA0A0A8"/>
     <TextClock android:id="@+id/minClk" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="7dp" android:format12Hour="mm" android:format24Hour="mm" android:textSize="14sp" android:fontFamily="monospace" android:includeFontPadding="false" android:textColor="#FF1C1C1E"/>
+    <TextClock android:id="@+id/secClk" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="5dp" android:format12Hour="ss" android:format24Hour="ss" android:textSize="11sp" android:fontFamily="monospace" android:includeFontPadding="false" android:textColor="#FFA0A0A8"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="7dp" android:text="●" android:textSize="9sp" android:includeFontPadding="false" android:textColor="#FFFF9F0A"/>
   </LinearLayout>
 </FrameLayout>

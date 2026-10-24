@@ -30,7 +30,9 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 import kotlin.math.*
 
-fun zid(t: String): ZoneId = try { ZoneId.of(t) } catch (e: Exception) { ZoneId.systemDefault() }
+val ALIAS = mapOf("Asia/Kolkata" to "Asia/Calcutta", "Asia/Ho_Chi_Minh" to "Asia/Saigon", "Asia/Yangon" to "Asia/Rangoon", "America/Godthab" to "America/Nuuk", "Asia/Kathmandu" to "Asia/Katmandu", "Europe/Kiev" to "Europe/Kyiv")
+fun zid(t: String): ZoneId = try { ZoneId.of(t) } catch (e: Exception) { try { ZoneId.of(ALIAS[t] ?: t) } catch (e2: Exception) { ZoneId.systemDefault() } }
+fun hms(t: ZonedDateTime) = hm(t.hour, t.minute) + if (S.seconds) ":" + two(t.second) else ""
 object Atlas {
     fun load(c: Context) { try {
         val l = c.assets.open("capitals.txt").bufferedReader().readLines().filter { it.isNotBlank() }.map { val p = it.split("|"); City(p[0], p[1], p[2], p[3].toDouble(), p[4].toDouble(), p[5].toFloat()) }
@@ -53,12 +55,13 @@ object World { var rows: List<String> = emptyList() }
     val c = LocalContext.current; val d = dk(); val fg = fgC(d); val bgc = bgC(d); val hp = LocalHapticFeedback.current
     val rows = remember { if (World.rows.isEmpty()) World.rows = c.assets.open("land.txt").bufferedReader().readLines(); World.rows }
     val city = cityOf(S.cities[S.sel.coerceIn(0, S.cities.size - 1)])
-    var now by remember { mutableStateOf(ZonedDateTime.now()) }; LaunchedEffect(Unit) { while (true) { now = ZonedDateTime.now(); delay(1000) } }
+    var now by remember { mutableStateOf(ZonedDateTime.now()) }; LaunchedEffect(Unit) { while (true) { now = ZonedDateTime.now(); delay(1000L - System.currentTimeMillis() % 1000L) } }
     val t = now.withZoneSameInstant(zid(city.tz)); val off = t.offset.totalSeconds / 3600f
     val tLon = if (city.lon.isNaN()) off * 15f else city.lon.toFloat(); val tLat = if (city.lat.isNaN()) 20f else city.lat.toFloat()
     var baseLon by remember { mutableStateOf(tLon) }
     LaunchedEffect(city) { var x = tLon; while (x - baseLon > 180) x -= 360; while (baseLon - x > 180) x += 360; baseLon = x }
-    val cx by animateFloatAsState(baseLon, spring(0.9f, 60f), label = "lon"); val cy by animateFloatAsState(tLat.coerceIn(-45f, 62f), spring(0.9f, 60f), label = "lat")
+    var zoom by remember { mutableStateOf(4.6f) }; val kz by animateFloatAsState(zoom, spring(0.9f, 200f), label = "zoom")
+    val cx by animateFloatAsState(baseLon, spring(0.9f, 60f), label = "lon"); val cy by animateFloatAsState(tLat.coerceIn(-50f, 70f), spring(0.9f, 60f), label = "lat")
     val ax by animateFloatAsState(off, spring(0.9f, 80f), label = "ax"); var drag by remember { mutableStateOf(0f) }
     Column(Modifier.fillMaxSize().statusBarsPadding().padding(bottom = 92.dp).pointerInput(S.cities.size) {
         detectHorizontalDragGestures(onDragEnd = { drag = 0f }) { _, dx -> drag += dx
@@ -69,9 +72,14 @@ object World { var rows: List<String> = emptyList() }
                 Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(if (on) fg else cardC(d)).border(1.dp, Line, RoundedCornerShape(14.dp)).press { S.sel = i; S.save() }, Alignment.Center) { Text(n.take(1), color = if (on) bgc else fg) } }
             Spacer(Modifier.weight(1f)); Box(Modifier.size(44.dp).background(fg, CircleShape).press { add() }, Alignment.Center) { Text("+", color = bgc, fontSize = 22.sp) }
         }
-        Box(Modifier.padding(top = 12.dp).weight(1f).fillMaxWidth().clipToBounds()) {
+        Box(Modifier.padding(top = 12.dp).weight(1f).fillMaxWidth().clipToBounds().pointerInput(Unit) { detectTapGestures { o ->
+            val k = kz.dp.toPx(); val lon = cx + (o.x - size.width / 2f) / k; val lat = cy - (o.y - size.height * .5f) / k; val cl = cos(Math.toRadians(lat.toDouble())).toFloat()
+            var best: City? = null; var bd = Float.MAX_VALUE
+            for (ct in ALL) { if (ct.lat.isNaN()) continue; var dl = (ct.lon.toFloat() - lon) % 360f; if (dl > 180f) dl -= 360f; if (dl < -180f) dl += 360f
+                val dy = ct.lat.toFloat() - lat; val dd = dl * cl * dl * cl + dy * dy; if (dd < bd) { bd = dd; best = ct } }
+            best?.let { b -> if (b.name !in S.cities) S.cities.add(b.name); S.sel = S.cities.indexOf(b.name); S.save(); hp.performHapticFeedback(HapticFeedbackType.LongPress) } } }) {
             Canvas(Modifier.fillMaxSize()) {
-                val k = 4.6.dp.toPx(); val w = size.width; val h = size.height; val ox = w / 2; val oy = h * 0.5f; val st = 1.5f
+                val k = kz.dp.toPx(); val w = size.width; val h = size.height; val ox = w / 2; val oy = h * 0.5f; val st = 1.5f
                 val i0 = floor((cx - ox / k + 180) / st).toInt() - 1; val i1 = ceil((cx + ox / k + 180) / st).toInt() + 1
                 val j0 = floor((90 - (cy + oy / k)) / st).toInt() - 1; val j1 = ceil((90 - (cy - oy / k)) / st).toInt() + 1
                 val land = if (d) Color(0xFF4A4A4C) else Color(0xFF8E8E8E); val rad = st * k * 0.34f; val rr = city.r * city.r
@@ -79,9 +87,13 @@ object World { var rows: List<String> = emptyList() }
                     for (i in i0..i1) { if (row[Math.floorMod(i, 240)] != '1') continue
                         val lon = -180 + (i + .5f) * st; val ddx = (lon - baseLon) * cosL; val ddy = lat - tLat; val hi = ddx * ddx + ddy * ddy < rr
                         drawCircle(if (hi) fg else land, if (hi) rad * 1.3f else rad, Offset(ox + (lon - cx) * k, oy + (cy - lat) * k)) } }
+                for (ct in ALL) { if (ct.lat.isNaN()) continue; var dl = (ct.lon.toFloat() - cx) % 360f; if (dl > 180f) dl -= 360f; if (dl < -180f) dl += 360f
+                    val x = ox + dl * k; val y = oy + (cy - ct.lat.toFloat()) * k; if (x > -8f && x < w + 8f && y > -8f && y < h + 8f) drawCircle(fg.copy(alpha = .6f), 2.2.dp.toPx(), Offset(x, y)) }
                 drawLine(RED, Offset(ox, 0f), Offset(ox, h), 1.5.dp.toPx())
                 drawCircle(RED, 6.dp.toPx(), Offset(ox, oy + (cy - tLat) * k), style = Stroke(2.dp.toPx())); drawCircle(bgc, 3.dp.toPx(), Offset(ox, oy + (cy - tLat) * k))
             }
+            Column(Modifier.align(Alignment.TopEnd).padding(10.dp), Arrangement.spacedBy(8.dp)) {
+                listOf("+" to 1.4f, "−" to 1f / 1.4f).forEach { (l, f) -> Box(Modifier.size(40.dp).background(cardC(d), CircleShape).border(1.dp, Line, CircleShape).press { zoom = (zoom * f).coerceIn(2.2f, 18f) }, Alignment.Center) { Text(l, color = fg, fontSize = 20.sp) } } }
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(Line))
         BoxWithConstraints(Modifier.fillMaxWidth().height(34.dp)) {
@@ -91,8 +103,8 @@ object World { var rows: List<String> = emptyList() }
                     textAlign = TextAlign.Center, fontSize = 12.sp, color = if (on) fg else dimC(d), fontWeight = if (on) FontWeight.Bold else FontWeight.Normal) }
         }
         Row(Modifier.padding(20.dp, 6.dp).fillMaxWidth().background(fg, RoundedCornerShape(28.dp)).padding(24.dp), Arrangement.SpaceBetween, Alignment.CenterVertically) {
-            Column { Text(utc(t), fontSize = 12.sp, color = bgc.copy(.6f)); Text(city.name, fontSize = 18.sp, color = bgc); Text(city.region, fontSize = 11.sp, color = bgc.copy(.5f)) }
-            Text(hm(t.hour, t.minute), fontSize = 44.sp, letterSpacing = (-2).sp, color = bgc)
+            Column(Modifier.weight(1f)) { Text(utc(t), fontSize = 12.sp, color = bgc.copy(.6f)); Text(city.name, fontSize = 18.sp, color = bgc, maxLines = 1); Text(city.region + " · " + t.format(DateTimeFormatter.ofPattern("EEE d MMM")), fontSize = 11.sp, color = bgc.copy(.5f), maxLines = 1) }
+            Text(hms(t), fontSize = if (S.seconds) 34.sp else 44.sp, letterSpacing = (-2).sp, color = bgc)
         }
     }
 }
@@ -107,6 +119,7 @@ val PRESETS = listOf(WCfg(100f, 0, true, true), WCfg(100f, 1, true, true), WCfg(
         Image(bmp, null, Modifier.fillMaxSize(), contentScale = ContentScale.FillBounds)
         Row(Modifier.align(Alignment.TopStart).padding(12.dp).background(Color(pl.pill), CircleShape).padding(10.dp, 5.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(hh(now.hour), color = Color(pl.dim), fontSize = 14.sp, fontFamily = FontFamily.Monospace); Text(" " + two(now.minute), color = Color(pl.ink), fontSize = 14.sp, fontFamily = FontFamily.Monospace)
+            if (cfg.sec) Text(" " + two(now.second), color = Color(pl.dim), fontSize = 11.sp, fontFamily = FontFamily.Monospace)
             Box(Modifier.padding(start = 6.dp).size(7.dp).background(Color(0xFFFF9F0A), CircleShape)) }
     }
 }
@@ -138,9 +151,9 @@ val PRESETS = listOf(WCfg(100f, 0, true, true), WCfg(100f, 1, true, true), WCfg(
         Column(Modifier.padding(top = 12.dp).fillMaxWidth().background(card, RoundedCornerShape(24.dp)).padding(16.dp)) {
             Text("Elements", color = fg, fontWeight = FontWeight.Medium)
             Row(Modifier.padding(top = 12.dp), Arrangement.spacedBy(16.dp)) {
-                for ((nm, on) in listOf("Dial" to cfg.dial, "Marks" to cfg.moon)) Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(Modifier.size(72.dp).background(if (d) Color(0xFF2A2A2C) else Color(0xFFE4E1D6), CircleShape).press { cfg = if (nm == "Dial") cfg.copy(dial = !cfg.dial) else cfg.copy(moon = !cfg.moon) }, Alignment.Center) {
-                        if (nm == "Dial") Ico2(1, fg) else Box(Modifier.width(6.dp).height(26.dp).background(Color.hsv(cfg.hue, .7f, .82f), RoundedCornerShape(3.dp)))
+                for ((nm, on) in listOf("Dial" to cfg.dial, "Marks" to cfg.moon, "Seconds" to cfg.sec)) Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(Modifier.size(72.dp).background(if (d) Color(0xFF2A2A2C) else Color(0xFFE4E1D6), CircleShape).press { cfg = when (nm) { "Dial" -> cfg.copy(dial = !cfg.dial); "Marks" -> cfg.copy(moon = !cfg.moon); else -> cfg.copy(sec = !cfg.sec) } }, Alignment.Center) {
+                        when (nm) { "Dial" -> Ico2(1, fg); "Seconds" -> Text("ss", color = fg, fontSize = 16.sp); else -> Box(Modifier.width(6.dp).height(26.dp).background(Color.hsv(cfg.hue, .7f, .82f), RoundedCornerShape(3.dp))) }
                         if (on) Box(Modifier.align(Alignment.BottomEnd).padding(8.dp).size(10.dp).background(RED, CircleShape)) }
                     Text(nm, color = dimC(d), fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp)) } }
         }
