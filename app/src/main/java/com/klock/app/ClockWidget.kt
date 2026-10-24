@@ -4,41 +4,49 @@ import android.appwidget.*
 import android.content.*
 import android.graphics.*
 import android.text.format.DateFormat
-import android.view.View
 import android.widget.RemoteViews
 import java.util.Calendar
 
-data class WCfg(val hue: Float = 8f, val style: Int = 0, val dial: Boolean = true, val moon: Boolean = true)
-class Pal(val bg: Int, val ink: Int, val dim: Int, val acc: Int)
+data class WCfg(val hue: Float = 100f, val style: Int = 0, val dial: Boolean = true, val moon: Boolean = true)
+class Pal(val dark: Boolean, val bgTop: Int, val bgBot: Int, val tick: Int, val num: Int, val hand: Int, val ink: Int, val dim: Int, val pill: Int, val acc: Int)
 object WStore {
-    fun get(c: Context) = c.getSharedPreferences("w", 0).let { WCfg(it.getFloat("h", 8f), it.getInt("s", 0), it.getBoolean("d", true), it.getBoolean("m", true)) }
-    fun set(c: Context, w: WCfg) { c.getSharedPreferences("w", 0).edit().putFloat("h", w.hue).putInt("s", w.style).putBoolean("d", w.dial).putBoolean("m", w.moon).apply() }
+    fun get(c: Context) = c.getSharedPreferences("w", 0).let { WCfg(it.getFloat("h2", 100f), it.getInt("s2", 0), it.getBoolean("d2", true), it.getBoolean("m2", true)) }
+    fun set(c: Context, w: WCfg) { c.getSharedPreferences("w", 0).edit().putFloat("h2", w.hue).putInt("s2", w.style).putBoolean("d2", w.dial).putBoolean("m2", w.moon).apply() }
 }
-fun palOf(w: WCfg): Pal { val a = Color.HSVToColor(floatArrayOf(w.hue, .85f, 1f))
-    return when (w.style) { 2 -> Pal(0xFFFBFBFC.toInt(), 0xFF1C1C1E.toInt(), 0xFFC9C9D3.toInt(), a); 1 -> Pal(0xFF0E0E10.toInt(), a, 0xFF4A4A52.toInt(), a); else -> Pal(0xFF0E0E10.toInt(), 0xFFFFFFFF.toInt(), 0xFF4A4A52.toInt(), a) } }
-fun moonFrac() = ((((System.currentTimeMillis() / 86400000.0) - 10957.76) % 29.530588 + 29.530588) % 29.530588) / 29.530588
+fun palOf(w: WCfg): Pal {
+    val acc = Color.HSVToColor(floatArrayOf(w.hue, .7f, .82f))
+    val dark = when (w.style) { 1 -> false; 2 -> true; else -> Calendar.getInstance().get(Calendar.HOUR_OF_DAY) >= 12 }
+    return if (dark) Pal(true, 0xFF222224.toInt(), 0xFF111112.toInt(), 0xFF55555A.toInt(), 0xFF8A8A90.toInt(), 0xFFEDEDED.toInt(), 0xFFFFFFFF.toInt(), 0xFF8A8A90.toInt(), 0xFF2C2C2E.toInt(), acc)
+    else Pal(false, 0xFFF9F9FB.toInt(), 0xFFE6E6EB.toInt(), 0xFFB9B9C0.toInt(), 0xFFA0A0A8.toInt(), 0xFFFFFFFF.toInt(), 0xFF1C1C1E.toInt(), 0xFFA0A0A8.toInt(), 0xFFEDEDF1.toInt(), acc)
+}
 
 fun faceBitmap(c: Context, wd: Int, hd: Int, cfg: WCfg): Bitmap {
-    val d = c.resources.displayMetrics; val W = (wd * d.density).toInt(); val H = (hd * d.density).toInt(); val w = W.toFloat(); val h = H.toFloat()
-    val bmp = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888); val cv = Canvas(bmp); val pl = palOf(cfg); cv.drawColor(pl.bg)
-    val p = Paint(Paint.ANTI_ALIAS_FLAG); val h24 = DateFormat.is24HourFormat(c); val hr = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    p.typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL); p.textSize = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 32f, d); p.textAlign = Paint.Align.CENTER; p.color = pl.dim
-    if (cfg.style != 1) { val base = 27 * d.density - p.fontMetrics.ascent
-        for (x in listOf(-2, -1, 1, 2)) { val hh = (hr + x + 24) % 24; val cx = w / 2 + x * w * 0.36f; val cy = base + x * x * w * 0.03f
-            cv.save(); cv.rotate(x * 14f, cx, cy); cv.drawText(two(if (h24) hh else (hh + 11) % 12 + 1), cx, cy, p); cv.restore() } }
+    val d = c.resources.displayMetrics; val W = (wd * d.density).toInt(); val H = (hd * d.density).toInt(); val w = W.toFloat(); val h = H.toFloat(); val S = Math.min(w, h)
+    val bmp = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888); val cv = Canvas(bmp); val pl = palOf(cfg); val p = Paint(Paint.ANTI_ALIAS_FLAG)
+    p.shader = LinearGradient(0f, 0f, 0f, h, pl.bgTop, pl.bgBot, Shader.TileMode.CLAMP); cv.drawRect(0f, 0f, w, h, p); p.shader = null
+    val cal = Calendar.getInstance(); val hr = cal.get(Calendar.HOUR_OF_DAY) % 12 + cal.get(Calendar.MINUTE) / 60f
+    val ha = Math.toRadians(hr * 30.0 - 90.0); val dx = Math.cos(ha).toFloat(); val dy = Math.sin(ha).toFloat()
+    val px = w / 2 - dx * S * .25f; val py = h / 2 - dy * S * .25f
+    fun pt(deg: Double, r: Float, ox: Float = px, oy: Float = py): PointF { val a = Math.toRadians(deg - 90.0); return PointF(ox + Math.cos(a).toFloat() * r, oy + Math.sin(a).toFloat() * r) }
+    p.strokeCap = Paint.Cap.ROUND
     if (cfg.dial) {
-        p.strokeCap = Paint.Cap.ROUND; p.strokeWidth = w * 0.014f; val py = h + w * 0.25f
-        for (k in -5..5) { val a = Math.toRadians(k * 11.0); val s = Math.sin(a).toFloat(); val co = Math.cos(a).toFloat(); p.color = if (k == 0) pl.acc else pl.dim
-            cv.drawLine(w / 2 + s * w * 0.42f, py - co * w * 0.42f, w / 2 + s * w * 0.5f, py - co * w * 0.5f, p) }
-        p.color = pl.acc; p.style = Paint.Style.FILL; cv.drawCircle(w / 2, h - w * 0.115f, w * 0.02f, p)
-        cv.drawPath(Path().apply { moveTo(w / 2 - w * 0.015f, h); lineTo(w / 2 + w * 0.015f, h); lineTo(w / 2, h - w * 0.09f); close() }, p)
+        p.style = Paint.Style.STROKE; p.strokeWidth = S * .003f; p.color = if (pl.dark) 0x22FFFFFF else 0x44C9B98A
+        for (k in 0 until 12) { val e = pt(k * 30.0, S * .6f); cv.drawLine(px, py, e.x, e.y, p) }
+        p.strokeWidth = S * .008f; p.color = pl.tick
+        for (k in 0 until 60) { if (k % 5 == 0) continue; val a = pt(k * 6.0, S * .5f); val b = pt(k * 6.0, S * .55f); cv.drawLine(a.x, a.y, b.x, b.y, p) }
+        p.style = Paint.Style.FILL; p.typeface = Typeface.create("sans-serif-light", Typeface.NORMAL); p.textSize = S * .055f; p.textAlign = Paint.Align.CENTER; p.color = pl.num
+        for (n in 1..12) { val a = n * 30.0; val q = pt(a, S * .66f); val rot = if (n == 12 || n == 6) 0f else if (n < 6) a.toFloat() else a.toFloat() - 180f
+            cv.save(); cv.rotate(rot, q.x, q.y); cv.drawText(n.toString(), q.x, q.y + p.textSize * .35f, p); cv.restore() }
     }
-    if (cfg.moon) {
-        val r = w * 0.085f; val mx = w * 0.85f; val my = h * 0.16f; val f = moonFrac(); p.style = Paint.Style.FILL
-        p.color = 0xFFD9D9DF.toInt(); cv.drawCircle(mx, my, r, p)
-        val sh = if (f < .5) -2 * r * (f * 2).toFloat() else 2 * r * (1 - (f - .5) * 2).toFloat()
-        p.color = pl.bg; cv.drawCircle(mx + sh, my, r, p)
-    }
+    if (cfg.moon) { p.style = Paint.Style.STROKE; p.strokeWidth = S * .016f; p.color = pl.acc
+        for (k in 0 until 12) { val a = pt(k * 30.0, S * .42f); val b = pt(k * 30.0, S * .545f); cv.drawLine(a.x, a.y, b.x, b.y, p) } }
+    val tip = PointF(px + dx * S * .33f, py + dy * S * .33f)
+    p.style = Paint.Style.STROKE; p.strokeWidth = S * .03f; p.color = pl.hand; p.setShadowLayer(S * .025f, 0f, S * .012f, 0x44000000); cv.drawLine(px, py, tip.x, tip.y, p); p.clearShadowLayer()
+    if (cfg.moon) { p.strokeWidth = S * .014f; p.color = pl.acc; cv.drawLine(px + dx * S * .12f, py + dy * S * .12f, px + dx * S * .27f, py + dy * S * .27f, p) }
+    p.style = Paint.Style.FILL; p.color = pl.hand; p.setShadowLayer(S * .02f, 0f, S * .01f, 0x44000000); cv.drawCircle(px, py, S * .04f, p); p.clearShadowLayer()
+    val bx = w - S * .167f; val by = S * .167f; p.color = if (pl.dark) 0xFF2C2C2E.toInt() else 0xFFF1F1F4.toInt(); cv.drawCircle(bx, by, S * .067f, p)
+    val letter = if (DateFormat.is24HourFormat(c)) "SMTWTFS"[cal.get(Calendar.DAY_OF_WEEK) - 1].toString() else if (cal.get(Calendar.AM_PM) == Calendar.AM) "A" else "P"
+    p.color = pl.num; p.textSize = S * .07f; p.textAlign = Paint.Align.CENTER; p.typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL); cv.drawText(letter, bx, by + p.textSize * .35f, p)
     return bmp
 }
 
@@ -51,8 +59,8 @@ class ClockWidget : AppWidgetProvider() {
             val w = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 160).coerceAtLeast(60); val h = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 176).coerceAtLeast(60)
             val v = RemoteViews(c.packageName, R.layout.widget_clock)
             v.setImageViewBitmap(R.id.dial, faceBitmap(c, w, h, cfg))
-            v.setViewVisibility(R.id.hourClk, if (cfg.style == 1) View.GONE else View.VISIBLE); v.setViewVisibility(R.id.timeClk, if (cfg.style == 1) View.VISIBLE else View.GONE)
-            v.setTextColor(R.id.hourClk, pl.ink); v.setTextColor(R.id.timeClk, pl.ink)
+            v.setInt(R.id.pill, "setBackgroundResource", if (pl.dark) R.drawable.pill_dark else R.drawable.pill_light)
+            v.setTextColor(R.id.hourClk, pl.dim); v.setTextColor(R.id.minClk, pl.ink)
             v.setOnClickPendingIntent(R.id.root, PendingIntent.getActivity(c, 0, Intent(c, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE))
             m.updateAppWidget(id, v)
         }

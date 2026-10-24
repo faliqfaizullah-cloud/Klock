@@ -21,6 +21,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.*
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
@@ -97,16 +98,16 @@ object World { var rows: List<String> = emptyList() }
 }
 
 fun refreshWidgets(c: Context) { val m = AppWidgetManager.getInstance(c); val ids = m.getAppWidgetIds(ComponentName(c, ClockWidget::class.java)); if (ids.isNotEmpty()) ClockWidget().onUpdate(c, m, ids) }
-val PRESETS = listOf(WCfg(8f, 0, true, true), WCfg(8f, 1, true, false), WCfg(210f, 2, true, false), WCfg(140f, 0, false, true), WCfg(50f, 1, false, true))
+val PRESETS = listOf(WCfg(100f, 0, true, true), WCfg(100f, 1, true, true), WCfg(100f, 2, true, true), WCfg(30f, 0, true, false), WCfg(200f, 2, false, true))
 
 @Composable fun WidgetFace(cfg: WCfg, mod: Modifier) {
     val c = LocalContext.current; val pl = palOf(cfg); val now = LocalDateTime.now()
     val bmp = remember(cfg, now.hour) { faceBitmap(c, 160, 176, cfg).asImageBitmap() }
     Box(mod.clip(RoundedCornerShape(28.dp))) {
         Image(bmp, null, Modifier.fillMaxSize(), contentScale = ContentScale.FillBounds)
-        Text(if (use24) now.format(DateTimeFormatter.ofPattern("EEE")) else if (now.hour < 12) "AM" else "PM", Modifier.align(Alignment.TopCenter).padding(top = 10.dp), color = Color(0xFF8A8A92), fontSize = 13.sp, fontWeight = FontWeight.Bold)
-        if (cfg.style == 1) Text(hm(now.hour, now.minute), Modifier.align(Alignment.Center), color = Color(pl.ink), fontSize = 40.sp, fontWeight = FontWeight.Medium, letterSpacing = (-1).sp)
-        else Text(hh(now.hour), Modifier.align(Alignment.TopCenter).padding(top = 22.dp), color = Color(pl.ink), fontSize = 32.sp, fontWeight = FontWeight.Medium)
+        Row(Modifier.align(Alignment.TopStart).padding(12.dp).background(Color(pl.pill), CircleShape).padding(10.dp, 5.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(hh(now.hour), color = Color(pl.dim), fontSize = 14.sp, fontFamily = FontFamily.Monospace); Text(" " + two(now.minute), color = Color(pl.ink), fontSize = 14.sp, fontFamily = FontFamily.Monospace)
+            Box(Modifier.padding(start = 6.dp).size(7.dp).background(Color(0xFFFF9F0A), CircleShape)) }
     }
 }
 
@@ -131,15 +132,15 @@ val PRESETS = listOf(WCfg(8f, 0, true, true), WCfg(8f, 1, true, false), WCfg(210
                     Box(Modifier.offset { IntOffset((cfg.hue / 360f * wpx - 4.dp.toPx()).toInt(), 0) }.width(8.dp).fillMaxHeight().background(Color.White, RoundedCornerShape(4.dp))) } }
             Column(Modifier.weight(1f).background(card, RoundedCornerShape(24.dp)).padding(16.dp)) {
                 Text("Style", color = fg, fontWeight = FontWeight.Medium)
-                Row(Modifier.padding(top = 12.dp), Arrangement.spacedBy(8.dp)) { listOf(Color(0xFF0E0E10), Color.hsv(cfg.hue, .85f, 1f), Color(0xFFFBFBFC)).forEachIndexed { i, col ->
+                Row(Modifier.padding(top = 12.dp), Arrangement.spacedBy(8.dp)) { listOf(Color(0xFF9A9AA2), Color(0xFFF2F2F5), Color(0xFF1C1C1E)).forEachIndexed { i, col ->
                     Box(Modifier.size(38.dp).background(col, CircleShape).border(if (cfg.style == i) 2.dp else 1.dp, if (cfg.style == i) RED else Line, CircleShape).press { cfg = cfg.copy(style = i) }) } } }
         }
         Column(Modifier.padding(top = 12.dp).fillMaxWidth().background(card, RoundedCornerShape(24.dp)).padding(16.dp)) {
             Text("Elements", color = fg, fontWeight = FontWeight.Medium)
             Row(Modifier.padding(top = 12.dp), Arrangement.spacedBy(16.dp)) {
-                for ((nm, on) in listOf("Dial" to cfg.dial, "Moon" to cfg.moon)) Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                for ((nm, on) in listOf("Dial" to cfg.dial, "Marks" to cfg.moon)) Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(Modifier.size(72.dp).background(if (d) Color(0xFF2A2A2C) else Color(0xFFE4E1D6), CircleShape).press { cfg = if (nm == "Dial") cfg.copy(dial = !cfg.dial) else cfg.copy(moon = !cfg.moon) }, Alignment.Center) {
-                        if (nm == "Dial") Ico2(1, fg) else Text("🌙", fontSize = 26.sp)
+                        if (nm == "Dial") Ico2(1, fg) else Box(Modifier.width(6.dp).height(26.dp).background(Color.hsv(cfg.hue, .7f, .82f), RoundedCornerShape(3.dp)))
                         if (on) Box(Modifier.align(Alignment.BottomEnd).padding(8.dp).size(10.dp).background(RED, CircleShape)) }
                     Text(nm, color = dimC(d), fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp)) } }
         }

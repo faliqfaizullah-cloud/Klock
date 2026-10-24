@@ -38,7 +38,7 @@ fun AlarmItem.firesOn(bit: Int): Boolean = if (days == 0) (Calendar.getInstance(
 fun daysLabel(d: Int) = when (d) { 0 -> "No"; 127 -> "Daily"; else -> DAYN.filterIndexed { i, _ -> (d shr i) and 1 == 1 }.joinToString(" ") { it.take(2) } }
 fun soundTitle(c: Context, s: String): String = if (s.isBlank()) "Default alarm" else try { RingtoneManager.getRingtone(c, Uri.parse(s))?.getTitle(c) ?: "Sound" } catch (e: Exception) { "Sound" }
 fun loadSounds(c: Context): List<Pair<String, String>> { val l = mutableListOf("Default alarm" to "")
-    try { val rm = RingtoneManager(c); rm.setType(RingtoneManager.TYPE_ALARM); val cur = rm.cursor; while (cur.moveToNext()) l.add(cur.getString(RingtoneManager.TITLE_INDEX) to rm.getRingtoneUri(cur.position).toString()) } catch (e: Exception) { }
+    try { val rm = RingtoneManager(c); rm.setType(RingtoneManager.TYPE_ALARM); val cur = rm.cursor; var n = 0; while (cur.moveToNext()) { l.add(cur.getString(1) to rm.getRingtoneUri(n).toString()); n++ } } catch (e: Exception) { }
     return l }
 object Prev { var r: android.media.Ringtone? = null
     fun play(c: Context, s: String) { r?.stop(); r = RingtoneManager.getRingtone(c, if (s.isBlank()) RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM) else Uri.parse(s)); r?.play(); Handler(Looper.getMainLooper()).postDelayed({ r?.stop() }, 2500) } }
